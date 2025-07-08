@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { register } from "@/lib/actions";
 import type { User } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ function SubmitButton() {
 }
 
 export function RegistrationForm({ supervisors }: { supervisors: User[] }) {
-  const [state, action] = useFormState(register, undefined);
+  const [state, action] = useActionState(register, undefined);
   const [role, setRole] = useState("employee");
 
   return (

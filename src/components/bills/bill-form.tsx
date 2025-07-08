@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { submitBill } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ function SubmitButton() {
 }
 
 export function BillForm() {
-  const [state, action] = useFormState(submitBill, undefined);
+  const [state, action] = useActionState(submitBill, undefined);
 
   return (
     <form action={action} className="space-y-4">

@@ -42,7 +42,7 @@ export function BillsTable({ bills, users, title }: BillsTableProps) {
               bills.map((bill) => (
                 <TableRow key={bill.id}>
                   <TableCell className="font-medium">
-                    {bill.items.length > 1 ? `${bill.items.length} items` : bill.items[0]?.purpose || 'Conveyance Bill'}
+                    {(bill.items && bill.items.length > 1) ? `${bill.items.length} items` : (bill.items?.[0]?.purpose || 'Conveyance Bill')}
                     <p className="text-xs text-muted-foreground">{bill.id}</p>
                   </TableCell>
                   <TableCell>

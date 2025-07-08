@@ -1,5 +1,4 @@
 import { getSession, logout } from "@/lib/actions";
-import { Logo } from "./logo";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
@@ -11,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { LogOut } from "lucide-react";
-import Link from "next/link";
+import { SidebarTrigger } from "./ui/sidebar";
 
 export async function DashboardHeader() {
   const session = await getSession();
@@ -27,14 +26,12 @@ export async function DashboardHeader() {
     .join("");
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
-      <Link href="/dashboard">
-        <Logo />
-      </Link>
-      <div className="ml-auto flex items-center gap-4">
-        <span className="text-sm text-muted-foreground hidden md:inline">
-          Welcome, {user.name} ({user.role})
-        </span>
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <div className="md:hidden">
+        <SidebarTrigger />
+      </div>
+      <div className="flex-1" />
+      <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -48,7 +45,7 @@ export async function DashboardHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>

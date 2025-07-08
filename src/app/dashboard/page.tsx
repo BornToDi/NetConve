@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const getDashboardForRole = () => {
     switch (user.role) {
       case "employee":
-        return <EmployeeDashboard user={user} bills={allBills} />;
+        return <EmployeeDashboard user={user} bills={allBills} users={allUsers} />;
       case "supervisor":
         return <SupervisorDashboard user={user} bills={allBills} users={allUsers} />;
       case "accounts":

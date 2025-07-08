@@ -1,13 +1,11 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import { BillsTable } from "../bills/bills-table";
 import type { Bill, User } from "@/lib/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface EmployeeDashboardProps {
   user: User;
   bills: Bill[];
+  users: User[];
 }
 
 function getStatusCounts(bills: Bill[]) {
@@ -31,21 +29,19 @@ function getStatusCounts(bills: Bill[]) {
     return counts;
 }
 
-export function EmployeeDashboard({ user, bills }: EmployeeDashboardProps) {
+export function EmployeeDashboard({ user, bills, users }: EmployeeDashboardProps) {
   const myBills = bills.filter((bill) => bill.employeeId === user.id);
   const counts = getStatusCounts(myBills);
-  const allUsers = [user]; // For BillsTable
+  const recentBills = myBills.slice(0, 5);
+  const myPaidAmount = myBills.filter(b => b.status === 'PAID').reduce((acc, b) => acc + b.amount, 0);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">My Dashboard</h1>
-        <Button asChild className="bg-accent hover:bg-accent/90">
-          <Link href="/bills/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Bill
-          </Link>
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold">Hello, {user.name.split(" ")[0]}!</h1>
+        <p className="text-muted-foreground">
+            Welcome back! Here&apos;s a summary of your conveyance bills.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -81,17 +77,17 @@ export function EmployeeDashboard({ user, bills }: EmployeeDashboardProps) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Paid</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="h-4 w-4 text-muted-foreground"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(bills.filter(b=>b.status === 'PAID').reduce((acc, b) => acc + b.amount, 0))}</div>
-            <p className="text-xs text-muted-foreground">Total amount paid out</p>
+            <div className="text-2xl font-bold">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(myPaidAmount)}</div>
+            <p className="text-xs text-muted-foreground">Total amount reimbursed</p>
           </CardContent>
         </Card>
       </div>
 
-      <BillsTable bills={myBills} users={allUsers} title="My Bill Submissions"/>
+      <BillsTable bills={recentBills} users={users} title="Recent Bills"/>
     </div>
   );
 }

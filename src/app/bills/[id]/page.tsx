@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getBillById, findUserById } from "@/lib/data";
 import { getSession, handleBillAction, receiveMoney } from "@/lib/actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,7 +23,11 @@ async function getHistoryWithUserNames(bill: Bill) {
 
 export default async function BillDetailsPage({ params }: { params: { id: string } }) {
   const session = await getSession();
-  const user = session!.user;
+  if (!session) {
+    // This case should be handled by the layout, but as a safeguard:
+    redirect('/');
+  }
+  const user = session.user;
   const bill = await getBillById(params.id);
 
   if (!bill) {

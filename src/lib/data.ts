@@ -1,5 +1,5 @@
 
-import type { User, Bill, Role } from "./types";
+import type { User, Bill, Role, BillItem } from "./types";
 
 // This is a hack to preserve data across Next.js hot reloads in development.
 // In a real app, you'd use a database.
@@ -11,19 +11,21 @@ declare global {
 }
 
 const initialUsers: User[] = [
-  { id: "user-1", name: "Alice Employee", email: "alice@example.com", role: "employee", supervisorId: "user-2" },
-  { id: "user-2", name: "Bob Supervisor", email: "bob@example.com", role: "supervisor" },
-  { id: "user-3", name: "Charlie Accounts", email: "charlie@example.com", role: "accounts" },
-  { id: "user-4", name: "Diana Management", email: "diana@example.com", role: "management" },
-  { id: "user-5", name: "Eve Employee", email: "eve@example.com", role: "employee", supervisorId: "user-2" },
+  { id: "user-1", name: "Alice Employee", email: "alice@example.com", role: "employee", supervisorId: "user-2", designation: "Software Engineer" },
+  { id: "user-2", name: "Bob Supervisor", email: "bob@example.com", role: "supervisor", designation: "Engineering Manager" },
+  { id: "user-3", name: "Charlie Accounts", email: "charlie@example.com", role: "accounts", designation: "Accountant" },
+  { id: "user-4", name: "Diana Management", email: "diana@example.com", role: "management", designation: "CEO" },
+  { id: "user-5", name: "Eve Employee", email: "eve@example.com", role: "employee", supervisorId: "user-2", designation: "QA Engineer" },
 ];
 
 const initialBills: Bill[] = [
   {
     id: "bill-1",
     employeeId: "user-1",
-    title: "Client meeting travel",
     amount: 150.75,
+    items: [
+        { id: "item-1", date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), from: "Office", to: "Client Site A", transport: "Ride Share", purpose: "Client meeting", amount: 150.75 }
+    ],
     status: "SUBMITTED",
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -34,8 +36,10 @@ const initialBills: Bill[] = [
   {
     id: "bill-2",
     employeeId: "user-5",
-    title: "Office supplies purchase",
     amount: 85.00,
+     items: [
+        { id: "item-2", date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), from: "Store", to: "Office", transport: "Rickshaw", purpose: "Office supplies purchase", amount: 85.00 }
+    ],
     status: "APPROVED_BY_SUPERVISOR",
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
@@ -47,8 +51,10 @@ const initialBills: Bill[] = [
   {
     id: "bill-3",
     employeeId: "user-1",
-    title: "Team lunch",
     amount: 220.50,
+     items: [
+        { id: "item-3", date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), from: "Restaurant", to: "Office", transport: "Car", purpose: "Team lunch", amount: 220.50 }
+    ],
     status: "REJECTED_BY_SUPERVISOR",
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -101,7 +107,7 @@ export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
 };
 
 export const getBills = async (): Promise<Bill[]> => {
-    return bills;
+    return bills.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 };
 
 export const getBillById = async (id: string): Promise<Bill | undefined> => {

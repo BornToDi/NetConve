@@ -29,10 +29,10 @@ export function BillsTable({ bills, users, title }: BillsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
+              <TableHead>Details</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Created By</TableHead>
+              <TableHead>Submitted By</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -41,7 +41,10 @@ export function BillsTable({ bills, users, title }: BillsTableProps) {
             {bills.length > 0 ? (
               bills.map((bill) => (
                 <TableRow key={bill.id}>
-                  <TableCell className="font-medium">{bill.title}</TableCell>
+                  <TableCell className="font-medium">
+                    {bill.items.length > 1 ? `${bill.items.length} items` : bill.items[0]?.purpose || 'Conveyance Bill'}
+                    <p className="text-xs text-muted-foreground">{bill.id}</p>
+                  </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",

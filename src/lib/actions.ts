@@ -82,20 +82,29 @@ export async function submitBill(prevState: { error: string } | undefined, formD
         return { error: 'Unauthorized' };
     }
 
-    const title = formData.get('title') as string;
-    const amount = formData.get('amount') as string;
+    const itemsJSON = formData.get('items') as string;
+    const totalAmount = formData.get('totalAmount') as string;
 
-    if (!title || !amount) {
-        return { error: 'Title and amount are required.' };
+    if (!itemsJSON || !totalAmount) {
+        return { error: 'Bill items and total amount are required.' };
     }
     
-    await createBill({
-        employeeId: session.user.id,
-        title,
-        amount: parseFloat(amount),
-    });
+    try {
+        const items = JSON.parse(itemsJSON);
+        if (!Array.isArray(items) || items.length === 0) {
+            return { error: 'At least one bill item is required.' };
+        }
+        
+        await createBill({
+            employeeId: session.user.id,
+            items: items,
+            amount: parseFloat(totalAmount),
+        });
 
-    redirect('/dashboard');
+        redirect('/dashboard');
+    } catch (e) {
+        return { error: "Failed to submit bill. Please check the item details." };
+    }
 }
 
 export async function handleBillAction(billId: string, action: 'approve' | 'reject', comment?: string) {

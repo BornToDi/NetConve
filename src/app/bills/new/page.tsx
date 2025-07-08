@@ -10,11 +10,11 @@ export default async function NewBillPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl">
+    <div className="container mx-auto max-w-4xl">
         <Card>
             <CardHeader>
-                <CardTitle>Create New Bill</CardTitle>
-                <CardDescription>Fill out the details for your conveyance bill.</CardDescription>
+                <CardTitle>Create New Conveyance Bill</CardTitle>
+                <CardDescription>Fill out the details for your bill. You can add multiple items.</CardDescription>
             </CardHeader>
             <CardContent>
                 <BillForm />

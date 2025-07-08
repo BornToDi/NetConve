@@ -9,6 +9,8 @@ import { FileText } from "lucide-react";
 import type { Bill } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { ClientDate } from "@/components/client-date";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
 
 
 async function getHistoryWithUserNames(bill: Bill) {
@@ -38,17 +40,19 @@ export default async function BillDetailsPage({ params }: { params: { id: string
   const history = await getHistoryWithUserNames(bill);
 
   const canTakeAction = () => {
+      if (user.id === bill.employeeId && bill.status.startsWith('REJECTED')) return true; // Can resubmit
+      
       switch(user.role) {
           case 'supervisor': return bill.status === 'SUBMITTED';
           case 'accounts': return bill.status === 'APPROVED_BY_SUPERVISOR' || bill.status === 'APPROVED_BY_MANAGEMENT';
           case 'management': return bill.status === 'APPROVED_BY_ACCOUNTS';
-          case 'employee': return bill.status.startsWith('REJECTED'); // Can resubmit
           default: return false;
       }
   };
-  
+
+  const isResubmittable = user.id === bill.employeeId && bill.status.startsWith('REJECTED');
   const isPayableByAccounts = user.role === 'accounts' && bill.status === 'APPROVED_BY_MANAGEMENT';
-  const isReceivableByEmployee = user.role === 'employee' && bill.status === 'APPROVED_BY_MANAGEMENT';
+  const isReceivableByEmployee = user.id === bill.employeeId && bill.status === 'PAID';
 
   const ActionForm = ({ actionType }: { actionType: 'approve' | 'reject' }) => (
     <form action={async (formData) => {
@@ -73,24 +77,75 @@ export default async function BillDetailsPage({ params }: { params: { id: string
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6">
-        <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Bill Details</h1>
+        <div className="flex items-start justify-between">
+            <div>
+                 <h1 className="text-3xl font-bold">Conveyance Bill</h1>
+                 <p className="text-muted-foreground">
+                    Bill ID: {bill.id}
+                 </p>
+            </div>
             <StatusBadge status={bill.status} />
         </div>
+        <Separator />
       
         <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
-                <Card>
+                 <Card>
                     <CardHeader>
-                        <CardTitle>{bill.title}</CardTitle>
-                        <CardDescription>
-                            Submitted by {employee?.name} on <ClientDate dateString={bill.createdAt} format="date" />
-                        </CardDescription>
+                       <CardTitle>Bill Details</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-4xl font-bold tracking-tight">
-                            {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(bill.amount)}
-                        </p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <p className="font-semibold">Submitted By:</p>
+                                <p>{employee?.name}</p>
+                                <p className="text-sm text-muted-foreground">{employee?.designation}</p>
+                            </div>
+                            <div>
+                                <p className="font-semibold">Submission Date:</p>
+                                <p><ClientDate dateString={bill.createdAt} format="date" /></p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Bill Items</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>From</TableHead>
+                                    <TableHead>To</TableHead>
+                                    <TableHead>Purpose</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {bill.items.map((item, index) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell><ClientDate dateString={item.date} format="date" /></TableCell>
+                                        <TableCell>{item.from}</TableCell>
+                                        <TableCell>{item.to}</TableCell>
+                                        <TableCell>{item.purpose}</TableCell>
+                                        <TableCell className="text-right font-medium">
+                                            {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.amount)}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                         </Table>
+                         <div className="mt-4 flex justify-end border-t pt-4">
+                            <div className="text-right">
+                                <p className="text-muted-foreground">Total Amount</p>
+                                <p className="text-2xl font-bold">
+                                    {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(bill.amount)}
+                                </p>
+                            </div>
+                         </div>
                     </CardContent>
                 </Card>
 
@@ -129,7 +184,12 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                         <CardTitle>Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {canTakeAction() && (
+                         {isResubmittable && (
+                            <Button asChild className="w-full">
+                                <a href="/bills/new">Resubmit Bill</a>
+                            </Button>
+                        )}
+                        {canTakeAction() && !isResubmittable && (
                             <>
                                 <ActionForm actionType="approve" />
                                 <ActionForm actionType="reject" />
@@ -145,8 +205,8 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                                 <Button type="submit" className="w-full">Confirm Money Received</Button>
                             </form>
                         )}
-                        {bill.status === 'PAID' && <p className="text-center font-medium text-green-600">This bill has been paid.</p>}
-                        {!canTakeAction() && bill.status !== 'PAID' && !isPayableByAccounts && !isReceivableByEmployee && (
+                         {bill.status === 'PAID' && user.role !== 'employee' && <p className="text-center font-medium text-green-600">This bill has been paid.</p>}
+                        {!canTakeAction() && !isPayableByAccounts && !isReceivableByEmployee && !isResubmittable && (
                              <p className="text-center text-sm text-muted-foreground">No actions available for you at this stage.</p>
                         )}
                     </CardContent>

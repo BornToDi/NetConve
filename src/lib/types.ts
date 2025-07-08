@@ -17,13 +17,24 @@ export interface User {
   email: string;
   role: Role;
   supervisorId?: string;
+  designation?: string;
+}
+
+export interface BillItem {
+  id: string;
+  date: string;
+  from: string;
+  to: string;
+  transport: string;
+  purpose: string;
+  amount: number;
 }
 
 export interface Bill {
-  id: string;
+  id:string;
   employeeId: string;
-  title: string;
-  amount: number;
+  amount: number; // This is the total amount
+  items: BillItem[];
   status: BillStatus;
   createdAt: string;
   updatedAt: string;

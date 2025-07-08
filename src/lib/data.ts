@@ -1,7 +1,16 @@
+
 import type { User, Bill, Role } from "./types";
 
-// Mock data store
-let users: User[] = [
+// This is a hack to preserve data across Next.js hot reloads in development.
+// In a real app, you'd use a database.
+declare global {
+  // eslint-disable-next-line no-var
+  var __users: User[] | undefined;
+  // eslint-disable-next-line no-var
+  var __bills: Bill[] | undefined;
+}
+
+const initialUsers: User[] = [
   { id: "user-1", name: "Alice Employee", email: "alice@example.com", role: "employee", supervisorId: "user-2" },
   { id: "user-2", name: "Bob Supervisor", email: "bob@example.com", role: "supervisor" },
   { id: "user-3", name: "Charlie Accounts", email: "charlie@example.com", role: "accounts" },
@@ -9,7 +18,7 @@ let users: User[] = [
   { id: "user-5", name: "Eve Employee", email: "eve@example.com", role: "employee", supervisorId: "user-2" },
 ];
 
-let bills: Bill[] = [
+const initialBills: Bill[] = [
   {
     id: "bill-1",
     employeeId: "user-1",
@@ -49,6 +58,25 @@ let bills: Bill[] = [
     ]
   },
 ];
+
+let users: User[];
+let bills: Bill[];
+
+// Initialize mock data on the global object if it doesn't exist.
+if (process.env.NODE_ENV === "production") {
+  users = initialUsers;
+  bills = initialBills;
+} else {
+  if (!global.__users) {
+    global.__users = initialUsers;
+  }
+  if (!global.__bills) {
+    global.__bills = initialBills;
+  }
+  users = global.__users;
+  bills = global.__bills;
+}
+
 
 // Mock API functions
 export const findUserByEmail = async (email: string): Promise<User | undefined> => {

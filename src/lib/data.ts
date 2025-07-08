@@ -21,6 +21,7 @@ const initialUsers: User[] = [
 const initialBills: Bill[] = [
   {
     id: "bill-1",
+    companyName: "Client Corp",
     employeeId: "user-1",
     amount: 150.75,
     items: [
@@ -35,6 +36,7 @@ const initialBills: Bill[] = [
   },
   {
     id: "bill-2",
+    companyName: "Supplier Inc.",
     employeeId: "user-5",
     amount: 85.00,
      items: [
@@ -50,6 +52,7 @@ const initialBills: Bill[] = [
   },
   {
     id: "bill-3",
+    companyName: "Partner Co.",
     employeeId: "user-1",
     amount: 220.50,
      items: [

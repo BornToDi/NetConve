@@ -32,6 +32,7 @@ export interface BillItem {
 
 export interface Bill {
   id:string;
+  companyName: string;
   employeeId: string;
   amount: number; // This is the total amount
   items: BillItem[];

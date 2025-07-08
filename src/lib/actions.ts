@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { findUserByEmail, createUser, createBill, getBillById, updateBillStatus, findUserById } from "./data";
 import type { Role, BillStatus } from "./types";
+import { revalidatePath } from "next/cache";
 
 const SESSION_COOKIE_NAME = "office-flow-session";
 
@@ -82,11 +83,12 @@ export async function submitBill(prevState: { error: string } | undefined, formD
         return { error: 'Unauthorized' };
     }
 
+    const companyName = formData.get('companyName') as string;
     const itemsJSON = formData.get('items') as string;
     const totalAmount = formData.get('totalAmount') as string;
 
-    if (!itemsJSON || !totalAmount) {
-        return { error: 'Bill items and total amount are required.' };
+    if (!companyName || !itemsJSON || !totalAmount) {
+        return { error: 'Company Name, bill items and total amount are required.' };
     }
     
     try {
@@ -97,14 +99,18 @@ export async function submitBill(prevState: { error: string } | undefined, formD
         
         await createBill({
             employeeId: session.user.id,
+            companyName: companyName,
             items: items,
             amount: parseFloat(totalAmount),
         });
-
-        redirect('/dashboard');
+        
     } catch (e) {
         return { error: "Failed to submit bill. Please check the item details." };
     }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/bills');
+    redirect('/bills');
 }
 
 export async function handleBillAction(billId: string, action: 'approve' | 'reject', comment?: string) {
@@ -148,7 +154,7 @@ export async function handleBillAction(billId: string, action: 'approve' | 'reje
         throw new Error('Invalid action for your role or bill status.');
     }
     
-    redirect(`/bills/${billId}`);
+    revalidatePath(`/bills/${billId}`);
 }
 
 export async function receiveMoney(billId: string) {
@@ -157,5 +163,5 @@ export async function receiveMoney(billId: string) {
         throw new Error('Unauthorized');
     }
     await updateBillStatus(billId, 'PAID', session.user.id, 'Payment confirmed by employee.');
-    redirect(`/bills/${billId}`);
+    revalidatePath(`/bills/${billId}`);
 }

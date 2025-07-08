@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getBillById, findUserById } from "@/lib/data";
 import { getSession, handleBillAction, receiveMoney } from "@/lib/actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,11 +25,7 @@ async function getHistoryWithUserNames(bill: Bill) {
 
 export default async function BillDetailsPage({ params }: { params: { id: string } }) {
   const session = await getSession();
-  if (!session) {
-    // This case should be handled by the layout, but as a safeguard:
-    redirect('/');
-  }
-  const user = session.user;
+  const user = session!.user;
   const bill = await getBillById(params.id);
 
   if (!bill) {
@@ -105,6 +101,10 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                                 <p className="font-semibold">Submission Date:</p>
                                 <p><ClientDate dateString={bill.createdAt} format="date" /></p>
                             </div>
+                            <div className="col-span-2">
+                                <p className="font-semibold">Company Name:</p>
+                                <p>{bill.companyName}</p>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -125,7 +125,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {bill.items.map((item, index) => (
+                                {bill.items.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell><ClientDate dateString={item.date} format="date" /></TableCell>
                                         <TableCell>{item.from}</TableCell>
@@ -196,7 +196,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                             </>
                         )}
                         {isPayableByAccounts && (
-                             <form action={async () => { 'use server'; await handleBillAction(bill.id, 'approve'); }}>
+                             <form action={async () => { 'use server'; await handleBillAction(bill.id, 'approve'); revalidatePath(`/bills/${bill.id}`); }}>
                                 <Button type="submit" className="w-full">Mark as Paid</Button>
                             </form>
                         )}

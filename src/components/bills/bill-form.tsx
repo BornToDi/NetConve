@@ -1,11 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
-import { useForm, useFieldArray, FormProvider, Controller } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useFormStatus } from "react-dom";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
@@ -19,6 +18,8 @@ import { AlertCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Separator } from "../ui/separator";
 
 
 const billItemSchema = z.object({
@@ -31,6 +32,7 @@ const billItemSchema = z.object({
 });
 
 const billFormSchema = z.object({
+  companyName: z.string().min(1, "Company name is required."),
   items: z.array(billItemSchema).min(1, "At least one bill item is required."),
 });
 
@@ -51,6 +53,7 @@ export function BillForm() {
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billFormSchema),
     defaultValues: {
+      companyName: "",
       items: [{ date: new Date(), from: "", to: "", transport: "", purpose: "", amount: 0 }],
     },
     mode: "onChange",
@@ -72,6 +75,7 @@ export function BillForm() {
       id: crypto.randomUUID(),
     }));
 
+    formData.append("companyName", data.companyName);
     formData.append("items", JSON.stringify(itemsForServer));
     formData.append("totalAmount", totalAmount.toString());
     action(formData);
@@ -81,127 +85,153 @@ export function BillForm() {
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          {fields.map((field, index) => (
-            <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 border p-4 rounded-lg relative">
-              <div className="md:col-span-12 font-medium text-primary">Item #{index + 1}</div>
-              
-              <FormField
-                control={form.control}
-                name={`items.${index}.date`}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-4">
-                    <Label>Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name={`items.${index}.from`}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-4">
-                    <Label>From</Label>
-                    <FormControl><Input placeholder="e.g. Office" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`items.${index}.to`}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-4">
-                    <Label>To</Label>
-                    <FormControl><Input placeholder="e.g. Client Office" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name={`items.${index}.transport`}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-4">
-                    <Label>Transport</Label>
-                    <FormControl><Input placeholder="e.g. Pathao, CNG" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`items.${index}.purpose`}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-4">
-                    <Label>Purpose</Label>
-                    <FormControl><Input placeholder="e.g. Meeting" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-               <FormField
-                control={form.control}
-                name={`items.${index}.amount`}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-4">
-                    <Label>Amount</Label>
-                    <FormControl><Input type="number" step="0.01" placeholder="0.00" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="md:col-span-12 flex justify-end">
-                 {fields.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+        <FormField
+          control={form.control}
+          name="companyName"
+          render={({ field }) => (
+            <FormItem>
+              <Label>Company Name</Label>
+              <FormControl><Input placeholder="e.g. Acme Corporation" {...field} /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[150px]">Date</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>Transport</TableHead>
+                <TableHead>Purpose</TableHead>
+                <TableHead className="w-[120px] text-right">Amount</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {fields.map((field, index) => (
+                <TableRow key={field.id} className="align-top">
+                  <TableCell className="p-1">
+                    <FormField
+                      control={form.control}
+                      name={`items.${index}.date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full justify-start pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell className="p-1">
+                     <FormField
+                        control={form.control}
+                        name={`items.${index}.from`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input placeholder="e.g. Office" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  </TableCell>
+                  <TableCell className="p-1">
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.to`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input placeholder="e.g. Client Office" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  </TableCell>
+                  <TableCell className="p-1">
+                     <FormField
+                        control={form.control}
+                        name={`items.${index}.transport`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input placeholder="e.g. Pathao, CNG" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  </TableCell>
+                  <TableCell className="p-1">
+                     <FormField
+                        control={form.control}
+                        name={`items.${index}.purpose`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input placeholder="e.g. Meeting" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  </TableCell>
+                  <TableCell className="p-1">
+                     <FormField
+                        control={form.control}
+                        name={`items.${index}.amount`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl><Input type="number" step="0.01" placeholder="0.00" className="text-right" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  </TableCell>
+                   <TableCell className="p-1 pt-3 text-right">
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
 
         <Button
@@ -213,14 +243,35 @@ export function BillForm() {
           Add Item
         </Button>
         
-        <div className="mt-6 border-t pt-4 space-y-4">
-            <div className="flex justify-between items-center text-xl font-bold">
-                <span>Total Amount:</span>
-                <span>
-                     {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalAmount)}
-                </span>
+        <Separator />
+        
+        <div className="flex justify-end">
+            <div className="w-full max-w-xs space-y-2">
+                 <div className="flex justify-between items-center font-medium">
+                    <span>Subtotal</span>
+                    <span>
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalAmount)}
+                    </span>
+                 </div>
+                 <div className="flex justify-between items-center font-medium text-muted-foreground">
+                    <span>Tax (0%)</span>
+                    <span>
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(0)}
+                    </span>
+                 </div>
+                 <Separator />
+                 <div className="flex justify-between items-center text-xl font-bold">
+                    <span>Total</span>
+                    <span>
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalAmount)}
+                    </span>
+                </div>
             </div>
+        </div>
+        
+        <Separator />
 
+        <div className="mt-6 space-y-4">
             {state?.error && (
             <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -228,7 +279,6 @@ export function BillForm() {
                 <AlertDescription>{state.error}</AlertDescription>
             </Alert>
             )}
-
            <SubmitButton />
         </div>
       </form>

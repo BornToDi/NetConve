@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
 import { Eye } from "lucide-react";
+import { ClientDate } from "../client-date";
 
 interface BillsTableProps {
   bills: Bill[];
@@ -51,7 +52,7 @@ export function BillsTable({ bills, users, title }: BillsTableProps) {
                     <StatusBadge status={bill.status} />
                   </TableCell>
                   <TableCell>{userMap.get(bill.employeeId) || "Unknown"}</TableCell>
-                  <TableCell>{new Date(bill.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell><ClientDate dateString={bill.createdAt} format="date" /></TableCell>
                   <TableCell className="text-right">
                     <Button asChild variant="ghost" size="icon">
                       <Link href={`/bills/${bill.id}`}>

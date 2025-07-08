@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/bills/status-badge";
-import { CheckCircle, Clock, FileText, User, XCircle } from "lucide-react";
-import type { Bill, User as UserType } from "@/lib/types";
+import { FileText } from "lucide-react";
+import type { Bill } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { ClientDate } from "@/components/client-date";
 
 
 async function getHistoryWithUserNames(bill: Bill) {
@@ -79,7 +80,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                     <CardHeader>
                         <CardTitle>{bill.title}</CardTitle>
                         <CardDescription>
-                            Submitted by {employee?.name} on {new Date(bill.createdAt).toLocaleDateString()}
+                            Submitted by {employee?.name} on <ClientDate dateString={bill.createdAt} format="date" />
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -106,7 +107,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                                     <div className="pb-4">
                                         <p className="font-semibold">{event.status.replace(/_/g, ' ')}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            By {event.actorName} on {new Date(event.timestamp).toLocaleString()}
+                                            By {event.actorName} on <ClientDate dateString={event.timestamp} format="locale" />
                                         </p>
                                         {event.comment && (
                                              <p className="mt-1 text-sm italic text-destructive">"{event.comment}"</p>

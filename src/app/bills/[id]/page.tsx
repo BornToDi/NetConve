@@ -23,10 +23,10 @@ async function getHistoryWithUserNames(bill: Bill) {
 
 export default async function BillDetailsPage({ params }: { params: { id: string } }) {
   const session = await getSession();
-  const user = session?.user;
+  const user = session!.user;
   const bill = await getBillById(params.id);
 
-  if (!bill || !user) {
+  if (!bill) {
     notFound();
   }
 

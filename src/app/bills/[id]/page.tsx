@@ -40,7 +40,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
       
       switch(user.role) {
           case 'supervisor': return bill.status === 'SUBMITTED';
-          case 'accounts': return bill.status === 'APPROVED_BY_SUPERVISOR' || bill.status === 'APPROVED_BY_MANAGEMENT';
+          case 'accounts': return bill.status === 'APPROVED_BY_SUPERVISOR';
           case 'management': return bill.status === 'APPROVED_BY_ACCOUNTS';
           default: return false;
       }

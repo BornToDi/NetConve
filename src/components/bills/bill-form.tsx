@@ -35,6 +35,7 @@ const billItemSchema = z.object({
 const billFormSchema = z.object({
   companyName: z.string().min(1, "Company name is required."),
   companyAddress: z.string().min(1, "Company address is required."),
+  employeeId: z.string(),
   employeeName: z.string().min(1, "Employee name is required."),
   employeeDesignation: z.string().min(1, "Designation is required."),
   items: z.array(billItemSchema).min(1, "At least one bill item is required."),
@@ -60,6 +61,7 @@ export function BillForm({ user }: { user: User }) {
     defaultValues: {
       companyName: "Networld Bangladesh Limited",
       companyAddress: "57 & 57/A, Uday Tower, (4th Floor) Gulshan 1, Gulshan Avenue, 1212 Dhaka",
+      employeeId: user.id,
       employeeName: user.name,
       employeeDesignation: user.designation || "",
       items: [{ date: new Date(), from: "", to: "", transport: "", purpose: "", amount: 0 }],
@@ -83,22 +85,22 @@ export function BillForm({ user }: { user: User }) {
   }, [state, router]);
 
   const onSubmit = (data: BillFormValues) => {
-    const formData = new FormData();
-    const itemsForServer = data.items.map(item => ({
-      ...item,
-      date: item.date.toISOString(),
-      id: crypto.randomUUID(),
-    }));
-
-    formData.append("companyName", data.companyName);
-    formData.append("companyAddress", data.companyAddress);
-    formData.append("employeeName", data.employeeName);
-    formData.append("employeeDesignation", data.employeeDesignation);
-    formData.append("items", JSON.stringify(itemsForServer));
-    formData.append("totalAmount", totalAmount.toString());
-    formData.append("amountInWords", amountInWords);
-
     startTransition(() => {
+        const formData = new FormData();
+        const itemsForServer = data.items.map(item => ({
+          ...item,
+          date: item.date.toISOString(),
+          id: crypto.randomUUID(),
+        }));
+
+        formData.append("companyName", data.companyName);
+        formData.append("companyAddress", data.companyAddress);
+        formData.append("employeeName", data.employeeName);
+        formData.append("employeeDesignation", data.employeeDesignation);
+        formData.append("items", JSON.stringify(itemsForServer));
+        formData.append("totalAmount", totalAmount.toString());
+        formData.append("amountInWords", amountInWords);
+        
         action(formData);
     });
   };
@@ -130,7 +132,7 @@ export function BillForm({ user }: { user: User }) {
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
               name="employeeName"
               render={({ field }) => (
@@ -143,9 +145,20 @@ export function BillForm({ user }: { user: User }) {
             />
             <FormField
               control={form.control}
-              name="employeeDesignation"
+              name="employeeId"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel>Employee ID</FormLabel>
+                  <FormControl><Input {...field} disabled /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="employeeDesignation"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
                   <FormLabel>Designation</FormLabel>
                   <FormControl><Input placeholder="e.g. Software Engineer" {...field} /></FormControl>
                   <FormMessage />

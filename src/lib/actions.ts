@@ -85,11 +85,12 @@ export async function submitBill(prevState: { error?: string; success?: boolean;
 
     const companyName = formData.get('companyName') as string;
     const companyAddress = formData.get('companyAddress') as string;
+    const employeeId = formData.get('employeeId') as string;
     const amountInWords = formData.get('amountInWords') as string;
     const itemsJSON = formData.get('items') as string;
     const totalAmount = formData.get('totalAmount') as string;
 
-    if (!companyName || !itemsJSON || !totalAmount || !companyAddress || !amountInWords) {
+    if (!companyName || !itemsJSON || !totalAmount || !companyAddress || !amountInWords || !employeeId) {
         return { error: 'All fields are required.' };
     }
     
@@ -100,7 +101,7 @@ export async function submitBill(prevState: { error?: string; success?: boolean;
         }
         
         await createBill({
-            employeeId: session.user.id,
+            employeeId: employeeId,
             companyName,
             companyAddress,
             amountInWords,

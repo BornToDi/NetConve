@@ -36,12 +36,12 @@ export function numberToWords(num: number): string {
         return word.trim();
     }
 
-    let words = convert(parseInt(integerPart, 10)) + ' Dollars';
+    let words = convert(parseInt(integerPart, 10)) + ' Taka';
 
     if (decimalPart) {
         const cents = parseInt(decimalPart.slice(0, 2), 10);
         if (cents > 0) {
-            words += ' and ' + convert(cents) + ' Cents';
+            words += ' and ' + convert(cents) + ' Poisha';
         }
     }
 

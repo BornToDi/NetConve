@@ -52,9 +52,9 @@ export function BillsTable({ bills, users, title, action }: BillsTableProps) {
                     <p className="text-xs text-muted-foreground">{bill.id}</p>
                   </TableCell>
                   <TableCell>
-                    {new Intl.NumberFormat("en-US", {
+                    {new Intl.NumberFormat("en-IN", {
                       style: "currency",
-                      currency: "USD",
+                      currency: "BDT",
                     }).format(bill.amount)}
                   </TableCell>
                   <TableCell>

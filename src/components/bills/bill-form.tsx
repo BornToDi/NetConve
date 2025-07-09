@@ -35,7 +35,7 @@ const billItemSchema = z.object({
 const billFormSchema = z.object({
   companyName: z.string().min(1, "Company name is required."),
   companyAddress: z.string().min(1, "Company address is required."),
-  employeeId: z.string(),
+  employeeId: z.string().min(1, "Employee ID is required."),
   employeeName: z.string().min(1, "Employee name is required."),
   employeeDesignation: z.string().min(1, "Designation is required."),
   items: z.array(billItemSchema).min(1, "At least one bill item is required."),
@@ -95,6 +95,7 @@ export function BillForm({ user }: { user: User }) {
 
         formData.append("companyName", data.companyName);
         formData.append("companyAddress", data.companyAddress);
+        formData.append("employeeId", data.employeeId);
         formData.append("employeeName", data.employeeName);
         formData.append("employeeDesignation", data.employeeDesignation);
         formData.append("items", JSON.stringify(itemsForServer));
@@ -149,7 +150,7 @@ export function BillForm({ user }: { user: User }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Employee ID</FormLabel>
-                  <FormControl><Input {...field} disabled /></FormControl>
+                  <FormControl><Input {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -326,7 +327,7 @@ export function BillForm({ user }: { user: User }) {
                  <div className="flex justify-between items-center text-xl font-bold">
                     <span>Total</span>
                     <span>
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalAmount)}
+                        {new Intl.NumberFormat("en-IN", { style: "currency", currency: "BDT" }).format(totalAmount)}
                     </span>
                 </div>
             </div>

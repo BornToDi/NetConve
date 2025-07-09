@@ -123,7 +123,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                                         <TableCell>{item.transport}</TableCell>
                                         <TableCell>{item.purpose}</TableCell>
                                         <TableCell className="text-right font-medium">
-                                            {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.amount)}
+                                            {new Intl.NumberFormat("en-IN", { style: "currency", currency: "BDT" }).format(item.amount)}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -136,7 +136,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                             <div className="text-right">
                                 <p className="text-muted-foreground">Total Amount</p>
                                 <p className="text-2xl font-bold">
-                                    {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(bill.amount)}
+                                    {new Intl.NumberFormat("en-IN", { style: "currency", currency: "BDT" }).format(bill.amount)}
                                 </p>
                             </div>
                          </div>

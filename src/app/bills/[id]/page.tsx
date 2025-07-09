@@ -75,7 +75,7 @@ export default async function BillDetailsPage({ params }: { params: { id: string
     <div className="container mx-auto max-w-4xl space-y-6">
         <div className="flex items-start justify-between">
             <div>
-                 <h1 className="text-3xl font-bold">Conveyance Bill</h1>
+                 <h1 className="text-3xl font-bold">Bill Details</h1>
                  <p className="text-muted-foreground">
                     Bill ID: {bill.id}
                  </p>
@@ -87,49 +87,40 @@ export default async function BillDetailsPage({ params }: { params: { id: string
         <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
                  <Card>
-                    <CardHeader>
-                       <CardTitle>Bill Details</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="font-semibold">Submitted By:</p>
-                                <p>{employee?.name}</p>
-                                <p className="text-sm text-muted-foreground">{employee?.designation}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Submission Date:</p>
-                                <p><ClientDate dateString={bill.createdAt} format="date" /></p>
-                            </div>
-                            <div className="col-span-2">
-                                <p className="font-semibold">Company Name:</p>
-                                <p>{bill.companyName}</p>
-                            </div>
+                    <CardContent className="p-6">
+                        <div className="text-center mb-6">
+                            <h2 className="text-2xl font-bold">{bill.companyName}</h2>
+                            <p className="text-muted-foreground">{bill.companyAddress}</p>
                         </div>
-                    </CardContent>
-                </Card>
-                
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Bill Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                        <div className="flex justify-between items-center mb-4">
+                             <h3 className="text-xl font-semibold border-b-2 border-black pb-1">Conveyance Bill</h3>
+                             <p><strong>Date:</strong> <ClientDate dateString={bill.createdAt} format="date" /></p>
+                        </div>
+                        <div className="mb-6">
+                            <p><strong>Name:</strong> {employee?.name}</p>
+                            <p className="text-sm text-muted-foreground">{employee?.designation}</p>
+                        </div>
+                        
                          <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead className="w-[50px]">No.</TableHead>
                                     <TableHead>Date</TableHead>
                                     <TableHead>From</TableHead>
                                     <TableHead>To</TableHead>
+                                    <TableHead>Transport</TableHead>
                                     <TableHead>Purpose</TableHead>
                                     <TableHead className="text-right">Amount</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {bill.items.map((item) => (
+                                {bill.items.map((item, index) => (
                                     <TableRow key={item.id}>
+                                        <TableCell>{index + 1}</TableCell>
                                         <TableCell><ClientDate dateString={item.date} format="date" /></TableCell>
                                         <TableCell>{item.from}</TableCell>
                                         <TableCell>{item.to}</TableCell>
+                                        <TableCell>{item.transport}</TableCell>
                                         <TableCell>{item.purpose}</TableCell>
                                         <TableCell className="text-right font-medium">
                                             {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.amount)}
@@ -138,7 +129,10 @@ export default async function BillDetailsPage({ params }: { params: { id: string
                                 ))}
                             </TableBody>
                          </Table>
-                         <div className="mt-4 flex justify-end border-t pt-4">
+                         <div className="mt-4 flex justify-between border-t pt-4">
+                             <div>
+                                <p><strong>In words:</strong> {bill.amountInWords}</p>
+                             </div>
                             <div className="text-right">
                                 <p className="text-muted-foreground">Total Amount</p>
                                 <p className="text-2xl font-bold">

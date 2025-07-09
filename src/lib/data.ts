@@ -1,5 +1,6 @@
 
 import type { User, Bill, Role, BillItem } from "./types";
+import { numberToWords } from "./utils";
 
 // This is a hack to preserve data across Next.js hot reloads in development.
 // In a real app, you'd use a database.
@@ -22,8 +23,10 @@ const initialBills: Bill[] = [
   {
     id: "bill-1",
     companyName: "Client Corp",
+    companyAddress: "123 Tech Avenue, Silicon Valley",
     employeeId: "user-1",
     amount: 150.75,
+    amountInWords: "One Hundred Fifty Dollars and Seventy-Five Cents Only",
     items: [
         { id: "item-1", date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), from: "Office", to: "Client Site A", transport: "Ride Share", purpose: "Client meeting", amount: 150.75 }
     ],
@@ -37,8 +40,10 @@ const initialBills: Bill[] = [
   {
     id: "bill-2",
     companyName: "Supplier Inc.",
+    companyAddress: "456 Commerce Blvd, Business City",
     employeeId: "user-5",
     amount: 85.00,
+    amountInWords: "Eighty-Five Dollars Only",
      items: [
         { id: "item-2", date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), from: "Store", to: "Office", transport: "Rickshaw", purpose: "Office supplies purchase", amount: 85.00 }
     ],
@@ -53,8 +58,10 @@ const initialBills: Bill[] = [
   {
     id: "bill-3",
     companyName: "Partner Co.",
+    companyAddress: "789 Partnership Plaza, Collaboration Town",
     employeeId: "user-1",
     amount: 220.50,
+    amountInWords: "Two Hundred Twenty Dollars and Fifty Cents Only",
      items: [
         { id: "item-3", date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), from: "Restaurant", to: "Office", transport: "Car", purpose: "Team lunch", amount: 220.50 }
     ],

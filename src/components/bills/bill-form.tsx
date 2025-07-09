@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { cn } from "@/lib/utils";
+import { cn, numberToWords } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
 
@@ -17,9 +17,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from "../ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Separator } from "../ui/separator";
+import type { User } from "@/lib/types";
 
 
 const billItemSchema = z.object({
@@ -33,6 +34,9 @@ const billItemSchema = z.object({
 
 const billFormSchema = z.object({
   companyName: z.string().min(1, "Company name is required."),
+  companyAddress: z.string().min(1, "Company address is required."),
+  employeeName: z.string().min(1, "Employee name is required."),
+  employeeDesignation: z.string().min(1, "Designation is required."),
   items: z.array(billItemSchema).min(1, "At least one bill item is required."),
 });
 
@@ -46,7 +50,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
   );
 }
 
-export function BillForm() {
+export function BillForm({ user }: { user: User }) {
   const [state, action] = useActionState(submitBill, undefined);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -54,7 +58,10 @@ export function BillForm() {
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billFormSchema),
     defaultValues: {
-      companyName: "",
+      companyName: "Networld Bangladesh Limited",
+      companyAddress: "57 & 57/A, Uday Tower, (4th Floor) Gulshan 1, Gulshan Avenue, 1212 Dhaka",
+      employeeName: user.name,
+      employeeDesignation: user.designation || "",
       items: [{ date: new Date(), from: "", to: "", transport: "", purpose: "", amount: 0 }],
     },
     mode: "onChange",
@@ -67,6 +74,7 @@ export function BillForm() {
   
   const watchedItems = form.watch("items");
   const totalAmount = watchedItems.reduce((acc, current) => acc + (Number(current.amount) || 0), 0);
+  const amountInWords = numberToWords(totalAmount) + " Only";
   
   useEffect(() => {
     if (state?.success) {
@@ -83,8 +91,12 @@ export function BillForm() {
     }));
 
     formData.append("companyName", data.companyName);
+    formData.append("companyAddress", data.companyAddress);
+    formData.append("employeeName", data.employeeName);
+    formData.append("employeeDesignation", data.employeeDesignation);
     formData.append("items", JSON.stringify(itemsForServer));
     formData.append("totalAmount", totalAmount.toString());
+    formData.append("amountInWords", amountInWords);
 
     startTransition(() => {
         action(formData);
@@ -95,22 +107,58 @@ export function BillForm() {
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="companyName"
-          render={({ field }) => (
-            <FormItem>
-              <Label>Company Name</Label>
-              <FormControl><Input placeholder="e.g. Acme Corporation" {...field} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="companyName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Name</FormLabel>
+                  <FormControl><Input placeholder="e.g. Acme Corporation" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="companyAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Address</FormLabel>
+                  <FormControl><Input placeholder="e.g. 123 Main St, City" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="employeeName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employee Name</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="employeeDesignation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Designation</FormLabel>
+                  <FormControl><Input placeholder="e.g. Software Engineer" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+        </div>
         
         <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">No.</TableHead>
                 <TableHead className="w-[150px]">Date</TableHead>
                 <TableHead>From</TableHead>
                 <TableHead>To</TableHead>
@@ -123,6 +171,7 @@ export function BillForm() {
             <TableBody>
               {fields.map((field, index) => (
                 <TableRow key={field.id} className="align-top">
+                  <TableCell className="p-1 pt-3 font-medium">{index + 1}</TableCell>
                   <TableCell className="p-1">
                     <FormField
                       control={form.control}
@@ -255,21 +304,12 @@ export function BillForm() {
         
         <Separator />
         
-        <div className="flex justify-end">
+        <div className="flex justify-between items-start">
+            <div>
+                 <p className="font-medium">Amount in Words:</p>
+                 <p className="text-muted-foreground">{amountInWords}</p>
+            </div>
             <div className="w-full max-w-xs space-y-2">
-                 <div className="flex justify-between items-center font-medium">
-                    <span>Subtotal</span>
-                    <span>
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalAmount)}
-                    </span>
-                 </div>
-                 <div className="flex justify-between items-center font-medium text-muted-foreground">
-                    <span>Tax (0%)</span>
-                    <span>
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(0)}
-                    </span>
-                 </div>
-                 <Separator />
                  <div className="flex justify-between items-center text-xl font-bold">
                     <span>Total</span>
                     <span>

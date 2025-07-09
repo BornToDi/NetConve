@@ -1,4 +1,5 @@
 import { getSession } from "@/lib/actions";
+import { redirect } from "next/navigation";
 import { EmployeeDashboard } from "@/components/dashboard/employee-dashboard";
 import { SupervisorDashboard } from "@/components/dashboard/supervisor-dashboard";
 import { AccountsDashboard } from "@/components/dashboard/accounts-dashboard";
@@ -7,7 +8,10 @@ import { getBills, getUsers } from "@/lib/data";
 
 export default async function DashboardPage() {
   const session = await getSession();
-  const user = session!.user;
+  if (!session) {
+    redirect("/");
+  }
+  const user = session.user;
   
   const allBills = await getBills();
   const allUsers = await getUsers();

@@ -10,14 +10,21 @@ interface SupervisorDashboardProps {
 
 export function SupervisorDashboard({ user, bills, users }: SupervisorDashboardProps) {
   const teamMemberIds = users.filter(u => u.supervisorId === user.id).map(e => e.id);
-  const teamBills = bills.filter(bill => teamMemberIds.includes(bill.employeeId));
 
-  const pendingCount = teamBills.filter(bill => bill.status === 'SUBMITTED').length;
-  const approvedCount = teamBills.filter(bill => bill.status.startsWith('APPROVED')).length;
-  const rejectedCount = teamBills.filter(bill => bill.status.startsWith('REJECTED')).length;
-  const totalPaidAmount = teamBills.filter(b => b.status === 'PAID').reduce((acc, b) => acc + b.amount, 0);
+  // Bills submitted by team members that are awaiting this supervisor's approval.
+  const pendingApprovalBills = bills.filter(
+    bill => teamMemberIds.includes(bill.employeeId) && bill.status === 'SUBMITTED'
+  );
 
-  const pendingApprovalBills = teamBills.filter(bill => bill.status === "SUBMITTED");
+  // All bills associated with the supervisor's team, including their own, for summary stats.
+  const teamAndOwnBills = bills.filter(
+    bill => teamMemberIds.includes(bill.employeeId) || bill.employeeId === user.id
+  );
+
+  const pendingCount = pendingApprovalBills.length;
+  const approvedCount = teamAndOwnBills.filter(bill => bill.status.startsWith('APPROVED')).length;
+  const rejectedCount = teamAndOwnBills.filter(bill => bill.status.startsWith('REJECTED')).length;
+  const totalPaidAmount = teamAndOwnBills.filter(b => b.status === 'PAID').reduce((acc, b) => acc + b.amount, 0);
 
   return (
     <div className="space-y-6">

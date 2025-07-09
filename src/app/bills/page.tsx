@@ -24,8 +24,9 @@ export default async function BillsPage() {
         const teamMemberIds = allUsers
             .filter(u => u.supervisorId === user.id)
             .map(u => u.id);
-        billsToShow = allBills.filter(bill => teamMemberIds.includes(bill.employeeId));
-        title = "My Team's Bills";
+        // Include bills from team members and the supervisor themselves
+        billsToShow = allBills.filter(bill => teamMemberIds.includes(bill.employeeId) || bill.employeeId === user.id);
+        title = "My Team's & My Bills";
     }
 
     return (

@@ -77,7 +77,7 @@ export async function getSession() {
   return { user };
 }
 
-export async function submitBill(prevState: { error: string } | undefined, formData: FormData) {
+export async function submitBill(prevState: { error?: string; success?: boolean; } | undefined, formData: FormData) {
     const session = await getSession();
     if (!session || session.user.role !== 'employee') {
         return { error: 'Unauthorized' };
@@ -110,7 +110,7 @@ export async function submitBill(prevState: { error: string } | undefined, formD
 
     revalidatePath('/dashboard');
     revalidatePath('/bills');
-    redirect('/bills');
+    return { success: true };
 }
 
 export async function handleBillAction(billId: string, action: 'approve' | 'reject', comment?: string) {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -49,6 +50,7 @@ function SubmitButton() {
 
 export function BillForm() {
   const [state, action] = useActionState(submitBill, undefined);
+  const router = useRouter();
 
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billFormSchema),
@@ -66,6 +68,12 @@ export function BillForm() {
   
   const watchedItems = form.watch("items");
   const totalAmount = watchedItems.reduce((acc, current) => acc + (Number(current.amount) || 0), 0);
+  
+  useEffect(() => {
+    if (state?.success) {
+      router.push('/bills');
+    }
+  }, [state, router]);
 
   const onSubmit = (data: BillFormValues) => {
     const formData = new FormData();

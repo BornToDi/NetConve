@@ -79,7 +79,7 @@ export async function getSession() {
 
 export async function submitBill(prevState: { error?: string; success?: boolean; } | undefined, formData: FormData) {
     const session = await getSession();
-    if (!session || session.user.role !== 'employee') {
+    if (!session || !['employee', 'supervisor'].includes(session.user.role)) {
         return { error: 'Unauthorized' };
     }
 
@@ -106,7 +106,7 @@ export async function submitBill(prevState: { error?: string; success?: boolean;
             amountInWords,
             items: items,
             amount: parseFloat(totalAmount),
-        });
+        }, session.user.role);
         
     } catch (e) {
         return { error: "Failed to submit bill. Please check the item details." };

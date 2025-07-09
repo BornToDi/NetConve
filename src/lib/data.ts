@@ -1,5 +1,5 @@
 
-import type { User, Bill, Role, BillItem } from "./types";
+import type { User, Bill, Role, BillItem, BillStatus } from "./types";
 import { numberToWords } from "./utils";
 
 // This is a hack to preserve data across Next.js hot reloads in development.
@@ -124,14 +124,28 @@ export const getBillById = async (id: string): Promise<Bill | undefined> => {
     return bills.find(bill => bill.id === id);
 }
 
-export const createBill = async (billData: Omit<Bill, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'history'>): Promise<Bill> => {
+export const createBill = async (billData: Omit<Bill, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'history'>, creatorRole: Role): Promise<Bill> => {
+    const isSupervisor = creatorRole === 'supervisor';
+    const initialStatus: BillStatus = isSupervisor ? 'APPROVED_BY_SUPERVISOR' : 'SUBMITTED';
+
+    const history: Bill['history'] = [{ status: 'SUBMITTED', timestamp: new Date().toISOString(), actorId: billData.employeeId }];
+
+    if (isSupervisor) {
+        history.push({
+            status: 'APPROVED_BY_SUPERVISOR',
+            timestamp: new Date().toISOString(),
+            actorId: billData.employeeId,
+            comment: "Auto-approved for supervisor"
+        });
+    }
+
     const newBill: Bill = {
         id: `bill-${Date.now()}`,
         ...billData,
-        status: 'SUBMITTED',
+        status: initialStatus,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        history: [{ status: 'SUBMITTED', timestamp: new Date().toISOString(), actorId: billData.employeeId }]
+        history
     };
     bills.push(newBill);
     return newBill;

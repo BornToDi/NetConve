@@ -5,7 +5,7 @@ import { BillForm } from "@/components/bills/bill-form";
 
 export default async function NewBillPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "employee") {
+  if (!session || !["employee", "supervisor"].includes(session.user.role)) {
     redirect("/dashboard");
   }
 

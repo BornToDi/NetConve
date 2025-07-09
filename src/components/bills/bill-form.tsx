@@ -65,7 +65,7 @@ export function BillForm() {
   });
   
   const watchedItems = form.watch("items");
-  const totalAmount = watchedItems.reduce((acc, current) => acc + (current.amount || 0), 0);
+  const totalAmount = watchedItems.reduce((acc, current) => acc + (Number(current.amount) || 0), 0);
 
   const onSubmit = (data: BillFormValues) => {
     const formData = new FormData();

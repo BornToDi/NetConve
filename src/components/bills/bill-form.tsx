@@ -1,11 +1,10 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, PlusCircle, Trash2 } from "lucide-react";
@@ -39,11 +38,10 @@ const billFormSchema = z.object({
 
 type BillFormValues = z.infer<typeof billFormSchema>;
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
+function SubmitButton({ isPending }: { isPending: boolean }) {
   return (
-    <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={pending}>
-      {pending ? "Submitting..." : "Submit Bill"}
+    <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isPending}>
+      {isPending ? "Submitting..." : "Submit Bill"}
     </Button>
   );
 }
@@ -51,6 +49,7 @@ function SubmitButton() {
 export function BillForm() {
   const [state, action] = useActionState(submitBill, undefined);
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<BillFormValues>({
     resolver: zodResolver(billFormSchema),
@@ -86,7 +85,10 @@ export function BillForm() {
     formData.append("companyName", data.companyName);
     formData.append("items", JSON.stringify(itemsForServer));
     formData.append("totalAmount", totalAmount.toString());
-    action(formData);
+
+    startTransition(() => {
+        action(formData);
+    });
   };
   
 
@@ -287,7 +289,7 @@ export function BillForm() {
                 <AlertDescription>{state.error}</AlertDescription>
             </Alert>
             )}
-           <SubmitButton />
+           <SubmitButton isPending={isPending} />
         </div>
       </form>
     </FormProvider>

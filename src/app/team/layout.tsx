@@ -9,7 +9,7 @@ import { Logo } from "@/components/logo";
 import { getBills, getUsers } from "@/lib/data";
 import type { BillStatus } from "@/lib/types";
 
-export default async function DashboardLayout({
+export default async function TeamLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -73,7 +73,7 @@ export default async function DashboardLayout({
                 </SidebarGroup>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Dashboard" isActive>
+                        <SidebarMenuButton asChild tooltip="Dashboard">
                             <Link href="/dashboard">
                                 <LayoutGrid />
                                 Dashboard
@@ -98,7 +98,7 @@ export default async function DashboardLayout({
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Team">
+                        <SidebarMenuButton asChild tooltip="Team" isActive>
                             <Link href="/team">
                                 <Users />
                                 Team

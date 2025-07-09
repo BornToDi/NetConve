@@ -9,7 +9,7 @@ import { Logo } from "@/components/logo";
 import { getBills, getUsers } from "@/lib/data";
 import type { BillStatus } from "@/lib/types";
 
-export default async function DashboardLayout({
+export default async function ReportsLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -73,7 +73,7 @@ export default async function DashboardLayout({
                 </SidebarGroup>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Dashboard" isActive>
+                        <SidebarMenuButton asChild tooltip="Dashboard">
                             <Link href="/dashboard">
                                 <LayoutGrid />
                                 Dashboard
@@ -90,7 +90,7 @@ export default async function DashboardLayout({
                         {pendingCount > 0 && <SidebarMenuBadge>{pendingCount}</SidebarMenuBadge>}
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild tooltip="Reports">
+                        <SidebarMenuButton asChild tooltip="Reports" isActive>
                             <Link href="/reports">
                                 <BarChart />
                                 Reports

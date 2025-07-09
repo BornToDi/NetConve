@@ -91,7 +91,7 @@ export default async function BillsLayout({
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild tooltip="Reports">
-                            <Link href="#">
+                            <Link href="/reports">
                                 <BarChart />
                                 Reports
                             </Link>
@@ -99,7 +99,7 @@ export default async function BillsLayout({
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild tooltip="Team">
-                            <Link href="#">
+                            <Link href="/team">
                                 <Users />
                                 Team
                             </Link>

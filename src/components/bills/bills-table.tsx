@@ -17,14 +17,18 @@ interface BillsTableProps {
   bills: Bill[];
   users: User[];
   title: string;
+  action?: React.ReactNode;
 }
 
-export function BillsTable({ bills, users, title }: BillsTableProps) {
+export function BillsTable({ bills, users, title, action }: BillsTableProps) {
   const userMap = new Map(users.map((user) => [user.id, user.name]));
 
   return (
     <div>
-       <h2 className="text-2xl font-semibold mb-4">{title}</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">{title}</h2>
+        {action}
+      </div>
       <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>

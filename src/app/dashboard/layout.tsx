@@ -1,11 +1,13 @@
 import { getSession } from "@/lib/actions";
 import { redirect } from "next/navigation";
-import { SidebarProvider, Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarGroup } from "@/components/ui/sidebar";
+import { SidebarProvider, Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarContent, SidebarFooter, SidebarInset, SidebarGroup, SidebarMenuBadge } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, LayoutGrid, FileText, BarChart, Users, Settings } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { getBills, getUsers } from "@/lib/data";
+import type { BillStatus } from "@/lib/types";
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +17,43 @@ export default async function DashboardLayout({
   const session = await getSession();
   if (!session) {
     redirect("/");
+  }
+
+  const user = session.user;
+  const allBills = await getBills();
+  const allUsers = await getUsers();
+
+  let pendingCount = 0;
+  switch (user.role) {
+      case 'supervisor':
+          const teamMemberIds = allUsers
+              .filter(u => u.supervisorId === user.id)
+              .map(u => u.id);
+          pendingCount = allBills.filter(bill => 
+              teamMemberIds.includes(bill.employeeId) && bill.status === 'SUBMITTED'
+          ).length;
+          break;
+      case 'accounts':
+          pendingCount = allBills.filter(bill => 
+              bill.status === 'APPROVED_BY_SUPERVISOR' || bill.status === 'APPROVED_BY_MANAGEMENT'
+          ).length;
+          break;
+      case 'management':
+          pendingCount = allBills.filter(bill => 
+              bill.status === 'APPROVED_BY_ACCOUNTS'
+          ).length;
+          break;
+      case 'employee':
+          const employeePendingStatuses: BillStatus[] = [
+              'SUBMITTED',
+              'APPROVED_BY_SUPERVISOR',
+              'APPROVED_BY_ACCOUNTS',
+              'APPROVED_BY_MANAGEMENT'
+          ];
+          pendingCount = allBills.filter(bill => 
+              bill.employeeId === user.id && employeePendingStatuses.includes(bill.status)
+          ).length;
+          break;
   }
 
   return (
@@ -48,6 +87,7 @@ export default async function DashboardLayout({
                                 Bills
                             </Link>
                         </SidebarMenuButton>
+                        {pendingCount > 0 && <SidebarMenuBadge>{pendingCount}</SidebarMenuBadge>}
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild tooltip="Reports">

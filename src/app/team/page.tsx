@@ -2,7 +2,7 @@ import { getSession } from "@/lib/actions";
 import { getUsers } from "@/lib/data";
 import { redirect } from "next/navigation";
 import type { User } from "@/lib/types";
-import { TeamMembersTable } from "@/components/team/team-members-table";
+import { TeamView } from "@/components/team/team-view";
 
 export default async function TeamPage() {
     const session = await getSession();
@@ -24,7 +24,7 @@ export default async function TeamPage() {
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold">{title}</h1>
-            <TeamMembersTable users={usersToShow} allUsers={allUsers} />
+            <TeamView initialUsers={usersToShow} allUsers={allUsers} />
         </div>
     );
 }

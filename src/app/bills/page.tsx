@@ -1,8 +1,8 @@
 import { getSession } from "@/lib/actions";
 import { getBills, getUsers } from "@/lib/data";
-import { BillsTable } from "@/components/bills/bills-table";
 import { redirect } from "next/navigation";
 import type { User } from "@/lib/types";
+import { BillsView } from "@/components/bills/bills-view";
 
 export default async function BillsPage() {
     const session = await getSession();
@@ -32,7 +32,11 @@ export default async function BillsPage() {
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold">{title}</h1>
-            <BillsTable bills={billsToShow} users={allUsers} title="Bill History" />
+            <BillsView 
+                initialBills={billsToShow} 
+                users={allUsers} 
+                isSupervisor={user.role === 'supervisor'} 
+            />
         </div>
     );
 }
